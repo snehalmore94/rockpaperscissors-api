@@ -46,9 +46,11 @@ public class GameServiceImpl implements GameService {
      */
     @Override
     public Game createGame(final String playerName, final String player2Email) {
+        logger.info("Creating a new game for player: {}", playerName);
         Game game = new Game(playerName);
         gameRepository.save(game);
         emailService.sendEmail(player2Email, "Join Rock Paper Scissors Game", "Game ID: " + game.getId());
+        logger.info("Game created with ID: {} and email sent to: {}", game.getId(), player2Email);
         return game;
     }
 
@@ -62,9 +64,11 @@ public class GameServiceImpl implements GameService {
      */
     @Override
     public Game joinGame(final Long id, final String playerTwoName) {
+        logger.info("Player {} is attempting to join game with ID: {}", playerTwoName, id);
         Game game = gameRepository.findById(id).orElseThrow(() -> new GameNotFoundException("Game not found"));
         game.addPlayer(playerTwoName);
         gameRepository.save(game);
+        logger.info("Player {} joined game with ID: {}", playerTwoName, id);
         return game;
     }
 
@@ -77,6 +81,7 @@ public class GameServiceImpl implements GameService {
      */
     @Override
     public Game makeMove(final Long id, final String playerName, final Choice move) {
+        logger.info("Player {} is making a move in game with ID: {}", playerName, id);
         Game game = gameRepository.findById(id).orElseThrow(() -> new GameNotFoundException("Game not found"));
 
         validateGameStatus(game);
@@ -91,6 +96,7 @@ public class GameServiceImpl implements GameService {
         }
 
         gameRepository.save(game);
+        logger.info("Move made by player {} in game with ID: {}", playerName, id);
         return game;
     }
 
@@ -155,6 +161,7 @@ public class GameServiceImpl implements GameService {
      */
     @Override
     public Game getGame(Long id) {
+        logger.info("Retrieving game with ID: {}", id);
         return gameRepository.findById(id).orElseThrow(() -> new GameNotFoundException("Game not found"));
     }
 }
