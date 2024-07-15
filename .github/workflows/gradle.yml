@@ -31,4 +31,21 @@ jobs:
     - name: Build with Gradle Wrapper
       run: ./gradlew build
 
+    - name: Create Dockerfile
+      run: |
+          echo "FROM openjdk:17-jdk-slim" > Dockerfile
+          echo "COPY build/libs/rockpaperscissor.jar /app/rockpaperscissor.jar" >> Dockerfile
+          echo "EXPOSE 8080" >> Dockerfile
+          echo 'CMD ["java", "-jar", "/app/rockpaperscissor.jar"]' >> Dockerfile
+
+    - name: Build and push Docker Image
+      uses: mr-smithers-excellent/docker-build-push@v5
+      with:
+        image: snehalmore94/rockpaperscissor
+        tags: latest
+        registry: docker.io
+        dockerfile: Dockerfile
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+
 
