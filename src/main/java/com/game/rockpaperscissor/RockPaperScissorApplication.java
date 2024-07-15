@@ -20,7 +20,9 @@ public class RockPaperScissorApplication {
 	 */
 	public static void main(String[] args) {
 		try {
+			logger.info("Starting Rock Paper Scissor application");
 			SpringApplication.run(RockPaperScissorApplication.class, args);
+			logger.info("Rock Paper Scissor application started successfully");
 		} catch (Exception e) {
 			logger.error("Application failed to start", e);
 		}

@@ -13,12 +13,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/games")
 @Tag(name = "Game API", description = "API for managing Rock Paper Scissor games")
 public class GameController {
     private final GameService gameService;
+    Logger logger = LoggerFactory.getLogger(GameController.class);
+
 
     @Autowired
     public GameController(GameService gameService) {
@@ -35,8 +39,10 @@ public class GameController {
     @Operation(summary = "Create a new game", description = "Create a new game and send the game ID via email")
     @ApiResponsesCommon
     public ResponseEntity<String> createGame(@RequestBody Player player) {
+        logger.info("Creating a new game for player: {}", player.getName());
         String player2Email = player.getEmailId();
         Game game = gameService.createGame(player.getName(), player2Email);
+        logger.info("Game created with ID: {}", game.getId());
         return ResponseEntity.ok("Game created and ID is sent." + " Game ID is : " + game.getId());
     }
 
@@ -51,7 +57,9 @@ public class GameController {
     @Operation(summary = "Join an existing game", description = "Join an existing game by providing the game ID and name of the second player")
     @ApiResponsesCommon
     public ResponseEntity<Game> joinGame(@PathVariable Long id, @RequestBody JoinGameRequest request) {
+        logger.info("Player {} is attempting to join game with ID: {}", request.getPlayerTwoName(), id);
         Game game = gameService.joinGame(id, request.getPlayerTwoName());
+        logger.info("Player {} joined game with ID: {}", request.getPlayerTwoName(), id);
         return ResponseEntity.ok(game);
     }
 
@@ -70,7 +78,9 @@ public class GameController {
     })
     @ApiResponsesCommon
     public ResponseEntity<Game> makeMove(@PathVariable Long id, @RequestBody Move move) {
+        logger.info("Player {} is making a move in game with ID: {}", move.getName(), id);
         Game game = gameService.makeMove(id, move.getName(), move.getMove());
+        logger.info("Move made by player {} in game with ID: {}", move.getName(), id);
         return ResponseEntity.ok(game);
     }
 
@@ -84,7 +94,9 @@ public class GameController {
     @Operation(summary = "Get the game details", description = "Get the details of the game by providing the game ID")
     @ApiResponsesCommon
     public ResponseEntity<Game> getGame(@PathVariable Long id) {
+        logger.info("Retrieving game details with ID: {}", id);
         Game game = gameService.getGame(id);
+        logger.info("Game Details retrieved with ID: {}", id);
         return ResponseEntity.ok(game);
     }
 }

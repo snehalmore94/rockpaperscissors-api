@@ -6,11 +6,16 @@ import com.game.rockpaperscissor.model.Game;
 import com.game.rockpaperscissor.model.Round;
 import com.game.rockpaperscissor.service.GameResultService;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 import java.util.Optional;
 
 @Service
 public class GameResultServiceImpl implements GameResultService {
+
+    Logger logger = LoggerFactory.getLogger(GameResultServiceImpl.class);
 
     /**
      * Determines the winner of the game based on the moves made by the players in the latest round.
@@ -18,8 +23,10 @@ public class GameResultServiceImpl implements GameResultService {
      */
     @Override
     public void determineWinner(Game game) {
+        logger.info("Determining winner for game with ID: {}", game.getId());
         Optional<Round> latestRoundOpt = game.getLatestRound();
         if (latestRoundOpt.isEmpty()) {
+            logger.error("No rounds available to determine the winner");
             throw new IllegalStateException("No rounds available to determine the winner");
         }
         Round latestRound = latestRoundOpt.get();
@@ -27,6 +34,7 @@ public class GameResultServiceImpl implements GameResultService {
         Choice move2 = latestRound.getPlayerTwoMove();
 
         if (move1 == null || move2 == null) {
+            logger.error("Both players must make a move before determining the winner");
             throw new IllegalStateException("Both players must make a move before determining the winner");
         }
 
@@ -46,5 +54,6 @@ public class GameResultServiceImpl implements GameResultService {
         }
 
         game.setResult(result);
+        logger.info("Winner determined: {}", resultMessage);
     }
 }
