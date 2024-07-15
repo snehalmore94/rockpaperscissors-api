@@ -61,6 +61,7 @@ jobs:
         badges-directory: badges
         generate-branches-badge: true
         generate-summary: true
+        jacoco-csv-file: build/reports/test/jacocoTestReport.csv
 
     - name: Log coverage percentages to workflow output
       run: |
@@ -71,6 +72,6 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: jacoco-report
-        path: target/site/jacoco/
+        path: build/reports/test/
 
 
