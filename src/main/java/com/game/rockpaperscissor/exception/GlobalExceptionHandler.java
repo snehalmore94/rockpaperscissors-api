@@ -31,5 +31,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 
+    @ExceptionHandler(EmailSendingException.class)
+    public ResponseEntity<String> handleEmailSendingException(EmailSendingException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+    }
+
     // Add more exception handlers as needed in the future.
 }

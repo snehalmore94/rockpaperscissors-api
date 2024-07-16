@@ -16,6 +16,11 @@ jobs:
     permissions:
       contents: read
 
+    env:
+      DEV_BRANCH: "dev"
+      INT_BRANCH: "int"
+      PROD_BRANCH: "master"
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -73,5 +78,18 @@ jobs:
       with:
         name: jacoco-report
         path: build/reports/jacoco/test/
+
+      # Environment-specific steps
+    - name: Deploy to Dev Environment
+      if: github.ref == 'refs/heads/dev'
+      run: echo "Deploying to Dev Environment"
+
+    - name: Deploy to Int Environment
+      if: github.ref == 'refs/heads/int'
+      run: echo "Deploying to Int Environment"
+
+    - name: Deploy to Prod Environment
+      if: github.ref == 'refs/heads/master'
+      run: echo "Deploying to Prod Environment"
 
 

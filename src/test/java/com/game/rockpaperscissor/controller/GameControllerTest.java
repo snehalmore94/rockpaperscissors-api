@@ -1,6 +1,7 @@
 package com.game.rockpaperscissor.controller;
 
 import com.game.rockpaperscissor.dto.JoinGameRequest;
+import com.game.rockpaperscissor.exception.GameNotFoundException;
 import com.game.rockpaperscissor.model.Game;
 import com.game.rockpaperscissor.model.Move;
 import com.game.rockpaperscissor.model.Player;

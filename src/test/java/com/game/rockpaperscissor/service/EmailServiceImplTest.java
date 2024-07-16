@@ -1,5 +1,6 @@
 package com.game.rockpaperscissor.service;
 
+import com.game.rockpaperscissor.exception.EmailSendingException;
 import com.game.rockpaperscissor.service.impl.EmailServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,12 +23,16 @@ public class EmailServiceImplTest {
     private EmailServiceImpl emailService;
 
     @Test
-    public void testSendEmailWhenCalledWithValidArgumentsThenEmailIsSent() {
+    public void testSendEmailWhenCalledWithValidArgumentsThenEmailIsSent() throws EmailSendingException {
         String to = "test@example.com";
         String subject = "Test Subject";
         String text = "Test Text";
 
-        emailService.sendEmail(to, subject, text);
+        try {
+            emailService.sendEmail(to, subject, text);
+        } catch (EmailSendingException e) {
+            throw new RuntimeException(e);
+        }
         SimpleMailMessage expectedMessage = new SimpleMailMessage();
         expectedMessage.setTo(to);
         expectedMessage.setSubject(subject);

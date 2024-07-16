@@ -2,6 +2,7 @@ package com.game.rockpaperscissor.controller;
 
 import com.game.rockpaperscissor.annotations.ApiResponsesCommon;
 import com.game.rockpaperscissor.dto.JoinGameRequest;
+import com.game.rockpaperscissor.exception.EmailSendingException;
 import com.game.rockpaperscissor.model.Game;
 import com.game.rockpaperscissor.model.Move;
 import com.game.rockpaperscissor.model.Player;
@@ -38,7 +39,7 @@ public class GameController {
     @PostMapping
     @Operation(summary = "Create a new game", description = "Create a new game and send the game ID via email")
     @ApiResponsesCommon
-    public ResponseEntity<String> createGame(@RequestBody Player player) {
+    public ResponseEntity<String> createGame(@RequestBody Player player) throws EmailSendingException {
         logger.info("Creating a new game for player: {}", player.getName());
         String player2Email = player.getEmailId();
         Game game = gameService.createGame(player.getName(), player2Email);
@@ -49,7 +50,7 @@ public class GameController {
     /**
      * Join an existing game by providing the game ID and name of the second player.
      *
-     * @param id The ID of the game to join.
+     * @param id      The ID of the game to join.
      * @param request The request containing the name of the second player.
      * @return ResponseEntity containing the updated game state.
      */
@@ -66,7 +67,7 @@ public class GameController {
     /**
      * Make a move in the game by providing the game ID and your move.
      *
-     * @param id The ID of the game.
+     * @param id   The ID of the game.
      * @param move The move made by the player.
      * @return ResponseEntity containing the updated game state.
      */
