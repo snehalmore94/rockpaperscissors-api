@@ -1,6 +1,7 @@
 package com.game.rockpaperscissor.service;
 
 import com.game.rockpaperscissor.enums.Choice;
+import com.game.rockpaperscissor.exception.EmailSendingException;
 import com.game.rockpaperscissor.exception.GameNotFoundException;
 import com.game.rockpaperscissor.model.Game;
 import com.game.rockpaperscissor.repository.GameRepository;
@@ -38,12 +39,17 @@ public class GameServiceImplTest {
     }
 
     @Test
-    public void testCreateGame() {
+    public void testCreateGame() throws EmailSendingException {
         String playerName = "Player1";
         String player2Email = "player2@example.com";
         Game game = new Game(playerName);
         when(gameRepository.save(any(Game.class))).thenReturn(game);
-        Game createdGame = gameService.createGame(playerName, player2Email);
+        Game createdGame = null;
+        try {
+            createdGame = gameService.createGame(playerName, player2Email);
+        } catch (EmailSendingException e) {
+            throw new RuntimeException(e);
+        }
 
         assertNotNull(createdGame);
         assertEquals(playerName, createdGame.getPlayerOneName());

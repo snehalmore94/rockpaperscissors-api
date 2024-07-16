@@ -3,6 +3,7 @@ package com.game.rockpaperscissor.service.impl;
 import com.game.rockpaperscissor.enums.Choice;
 import com.game.rockpaperscissor.enums.GameResult;
 import com.game.rockpaperscissor.enums.GameStatus;
+import com.game.rockpaperscissor.exception.EmailSendingException;
 import com.game.rockpaperscissor.exception.GameFinishedException;
 import com.game.rockpaperscissor.exception.GameNotFoundException;
 import com.game.rockpaperscissor.model.Game;
@@ -45,7 +46,7 @@ public class GameServiceImpl implements GameService {
      * @return The created game.
      */
     @Override
-    public Game createGame(final String playerName, final String player2Email) {
+    public Game createGame(final String playerName, final String player2Email) throws EmailSendingException {
         logger.info("Creating a new game for player: {}", playerName);
         Game game = new Game(playerName);
         gameRepository.save(game);
@@ -66,6 +67,17 @@ public class GameServiceImpl implements GameService {
     public Game joinGame(final Long id, final String playerTwoName) {
         logger.info("Player {} is attempting to join game with ID: {}", playerTwoName, id);
         Game game = gameRepository.findById(id).orElseThrow(() -> new GameNotFoundException("Game not found"));
+
+        if (playerTwoName == null || playerTwoName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Player name cannot be empty");
+        }
+
+        // Validate that the game is not finished
+        validateGameStatus(game);
+
+        // Validate that Player 2's name is not the same as Player 1's name
+        validatePlayerNames(game, playerTwoName);
+
         game.addPlayer(playerTwoName);
         gameRepository.save(game);
         logger.info("Player {} joined game with ID: {}", playerTwoName, id);
@@ -89,6 +101,7 @@ public class GameServiceImpl implements GameService {
         validatePlayerInGame(game, playerName);
 
         Round latestRound = createOrGetLatestRound(game);
+        validateTurnOrder(game, latestRound, playerName); // Validate turn order
         setPlayerMove(game,latestRound, playerName, move);
 
         if (latestRound.getPlayerOneMove() != null && latestRound.getPlayerTwoMove() != null) {
@@ -132,6 +145,19 @@ public class GameServiceImpl implements GameService {
         }
     }
 
+    private void validateTurnOrder(Game game, Round round, String playerName) {
+        boolean isPlayerOne = playerName.equals(game.getPlayerOneName());
+        boolean isPlayerTwo = playerName.equals(game.getPlayerTwoName());
+
+        if (round.getPlayerOneMove() != null && round.getPlayerTwoMove() == null && isPlayerOne) {
+            logger.error("Player 1 has already made a move. Waiting for Player 2 to make a move.");
+            throw new IllegalStateException("Player 1 has already made a move. Waiting for Player 2 to make a move.");
+        } else if (round.getPlayerTwoMove() != null && round.getPlayerOneMove() == null && isPlayerTwo) {
+            logger.error("Player 2 has already made a move. Waiting for Player 1 to make a move.");
+            throw new IllegalStateException("Player 2 has already made a move. Waiting for Player 1 to make a move.");
+        }
+    }
+
     private void setPlayerMove(Game game, Round round, String playerName, Choice move) {
         if (playerName.equals(game.getPlayerOneName())) {
             round.setPlayerOneMove(move);
@@ -151,6 +177,13 @@ public class GameServiceImpl implements GameService {
 
         if (game.getPlayerOneScore() == 3 || game.getPlayerTwoScore() == 3 || game.getPlayerOneScore().equals(game.getPlayerTwoScore())) {
             game.setStatus(GameStatus.FINISHED);
+        }
+    }
+
+    private void validatePlayerNames(Game game, String playerTwoName) {
+        if (game.getPlayerOneName().equals(playerTwoName)) {
+            logger.error("Player 2's name cannot be the same as Player 1's name");
+            throw new IllegalArgumentException("Player 2's name cannot be the same as Player 1's name");
         }
     }
 
